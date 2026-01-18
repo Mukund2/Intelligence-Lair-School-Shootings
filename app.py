@@ -135,7 +135,7 @@ alert_manager.register_callback(on_alert)
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("Intelligence Lair - School Threat Detection")
+    print("Intelligence Layer - School Threat Detection")
     print("=" * 50)
 
     # Initialize cameras

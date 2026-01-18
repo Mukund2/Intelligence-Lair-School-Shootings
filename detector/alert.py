@@ -63,8 +63,9 @@ class AlertManager:
         """
         current_time = time.time()
 
-        # Check cooldown
-        last_time = self.last_alert_time.get(camera_id, 0)
+        # Check cooldown per camera+threat_type combo (same scissors won't spam)
+        cooldown_key = f"{camera_id}_{threat_type.lower()}"
+        last_time = self.last_alert_time.get(cooldown_key, 0)
         if current_time - last_time < self.cooldown_seconds:
             return None
 
@@ -80,7 +81,7 @@ class AlertManager:
         )
 
         self.alerts.append(alert)
-        self.last_alert_time[camera_id] = current_time
+        self.last_alert_time[cooldown_key] = current_time
 
         # Keep only last 100 alerts
         if len(self.alerts) > 100:

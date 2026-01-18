@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligence Lair - Threat Detection</title>
+    <title>Intelligence Layer - Threat Detection</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
     <style>
         * {
@@ -508,7 +508,7 @@
 <body>
     <header class="header">
         <div class="logo">
-            <h1>Intelligence <span>Lair</span></h1>
+            <h1>Intelligence <span>Layer</span></h1>
         </div>
 
         <div class="threat-level-bar">
@@ -745,32 +745,33 @@
                 if (noFeed) noFeed.style.display = 'none';
             }
 
+            // Update people count
+            const people = data.people || 0;
+            document.getElementById('peopleCount').textContent = people;
+
+            // Objects = everything except people and threats
+            const objects = Math.max(0, data.detections - people - data.threats);
+            document.getElementById('totalDetections').textContent = objects;
+
+            // Update current threat count on camera overlay
             if (detectionsEl) {
                 detectionsEl.textContent = data.detections;
-                // Objects = total detections minus people minus threats
-                const objectsOnly = Math.max(0, data.detections - (data.people || 0) - data.threats);
-                document.getElementById('totalDetections').textContent = objectsOnly;
             }
 
             if (threatsEl) {
                 threatsEl.textContent = data.threats;
-                // Only show session total threats, not current
-                document.getElementById('threatDetections').textContent = totalThreats;
-
-                // Update threat level based on CURRENT live threats
-                updateThreatLevel(data.threats);
-
-                if (data.threats > 0) {
-                    feedEl?.classList.add('threat');
-                    warningEl.style.display = 'block';
-                } else {
-                    feedEl?.classList.remove('threat');
-                    warningEl.style.display = 'none';
-                }
             }
 
-            // Update people count from backend
-            document.getElementById('peopleCount').textContent = data.people || 0;
+            // Update threat level based on CURRENT live threats (not session total)
+            updateThreatLevel(data.threats);
+
+            if (data.threats > 0) {
+                feedEl?.classList.add('threat');
+                if (warningEl) warningEl.style.display = 'block';
+            } else {
+                feedEl?.classList.remove('threat');
+                if (warningEl) warningEl.style.display = 'none';
+            }
         });
         {% endfor %}
 

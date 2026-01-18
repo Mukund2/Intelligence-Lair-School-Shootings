@@ -754,6 +754,9 @@
                 threatsEl.textContent = data.threats;
                 document.getElementById('threatDetections').textContent = totalThreats;
 
+                // Update threat level based on CURRENT live threats
+                updateThreatLevel(data.threats);
+
                 if (data.threats > 0) {
                     feedEl?.classList.add('threat');
                     warningEl.style.display = 'block';
@@ -763,8 +766,8 @@
                 }
             }
 
-            // Update people count (estimate from detections)
-            document.getElementById('peopleCount').textContent = Math.max(0, data.detections - data.threats);
+            // Update people count from backend
+            document.getElementById('peopleCount').textContent = data.people || 0;
         });
         {% endfor %}
 
@@ -776,9 +779,6 @@
             document.getElementById('alertCount').textContent = alertCount;
             document.getElementById('alertCount').classList.remove('zero');
             document.getElementById('threatDetections').textContent = totalThreats;
-
-            // Update threat level
-            updateThreatLevel(alertCount);
 
             // Play sound if not muted
             if (!isMuted) {
@@ -839,7 +839,6 @@
                         if (alertCount === 0) {
                             document.getElementById('alertCount').classList.add('zero');
                         }
-                        updateThreatLevel(alertCount);
                         addLogEntry(`Alert ${alertId} acknowledged`);
                     }
                 });
@@ -889,11 +888,10 @@
                     if (alertCount > 0) {
                         document.getElementById('alertCount').classList.remove('zero');
                     }
-                    updateThreatLevel(alertCount);
                 }
             });
 
-        // Initialize
+        // Initialize - threat level starts at SAFE (based on live detection)
         updateThreatLevel(0);
         addLogEntry('System initialized - monitoring active');
     </script>

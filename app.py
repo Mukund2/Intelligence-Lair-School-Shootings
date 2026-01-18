@@ -58,6 +58,9 @@ def process_camera(camera_id: str):
                 # Emit alert to all clients
                 socketio.emit("new_alert", alert.to_dict())
 
+        # Count people separately
+        people_count = sum(1 for d in detections if d.class_name.lower() == "person")
+
         # Encode frame to JPEG
         _, buffer = cv2.imencode(".jpg", annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
         frame_base64 = base64.b64encode(buffer).decode("utf-8")
@@ -67,6 +70,7 @@ def process_camera(camera_id: str):
             "camera_id": camera_id,
             "frame": frame_base64,
             "detections": len(detections),
+            "people": people_count,
             "threats": len(threats)
         })
 

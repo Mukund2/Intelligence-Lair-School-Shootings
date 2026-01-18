@@ -20,10 +20,8 @@ class WeaponDetector:
     """YOLOv8-based weapon and person detector."""
 
     # Classes that are considered threats (knives, scissors, and any sharp objects)
-    THREAT_CLASSES = {"knife", "scissors", "fork"}  # COCO classes that could be weapons
-
-    # All classes we care about detecting
-    DETECT_CLASSES = {"person", "knife", "scissors", "fork", "baseball bat", "tennis racket"}
+    # Using lowercase for matching
+    THREAT_CLASSES = {"knife", "scissors", "fork", "baseball bat"}
 
     def __init__(self, model_path: str = "yolov8n.pt", confidence_threshold: float = 0.5):
         """
@@ -38,6 +36,10 @@ class WeaponDetector:
         self.model = YOLO(model_path)
         self.class_names = self.model.names
         print(f"Model loaded with {len(self.class_names)} classes")
+        # Print threat-related classes for debugging
+        for idx, name in self.class_names.items():
+            if any(threat in name.lower() for threat in ["knife", "scissors", "fork", "bat"]):
+                print(f"  Threat class found: {idx} = {name}")
 
     def detect(self, frame: np.ndarray) -> Tuple[np.ndarray, List[Detection]]:
         """
@@ -69,8 +71,13 @@ class WeaponDetector:
                 class_id = int(box.cls[0])
                 class_name = self.class_names[class_id]
 
-                # Determine if this is a threat
-                is_threat = class_name.lower() in self.THREAT_CLASSES
+                # Determine if this is a threat (check if class name contains any threat word)
+                class_lower = class_name.lower()
+                is_threat = any(threat in class_lower for threat in self.THREAT_CLASSES)
+
+                # Log threat detections
+                if is_threat:
+                    print(f"🚨 THREAT DETECTED: {class_name} (confidence: {confidence:.2f})")
 
                 # Create detection object
                 detection = Detection(
@@ -81,18 +88,18 @@ class WeaponDetector:
                 )
                 detections.append(detection)
 
-                # Draw bounding box
+                # Draw bounding box - RED for ALL threats
                 if is_threat:
-                    # Red box for threats
-                    color = (0, 0, 255)
-                    thickness = 3
-                elif class_name.lower() == "person":
+                    # Bright RED box for threats - thick and visible
+                    color = (0, 0, 255)  # BGR format - pure red
+                    thickness = 4
+                elif class_lower == "person":
                     # Green box for people
                     color = (0, 255, 0)
                     thickness = 2
                 else:
-                    # Yellow box for other objects
-                    color = (0, 255, 255)
+                    # Blue box for other objects
+                    color = (255, 200, 0)
                     thickness = 1
 
                 cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), color, thickness)

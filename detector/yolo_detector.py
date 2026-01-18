@@ -19,11 +19,11 @@ class Detection:
 class WeaponDetector:
     """YOLOv8-based weapon and person detector."""
 
-    # Classes that are considered threats
-    THREAT_CLASSES = {"knife", "gun", "rifle", "pistol", "weapon"}
+    # Classes that are considered threats (knives, scissors, and any sharp objects)
+    THREAT_CLASSES = {"knife", "scissors", "fork"}  # COCO classes that could be weapons
 
-    # Classes to detect (person for tracking, weapons for alerts)
-    DETECT_CLASSES = {"person", "knife"}  # Default YOLO classes
+    # All classes we care about detecting
+    DETECT_CLASSES = {"person", "knife", "scissors", "fork", "baseball bat", "tennis racket"}
 
     def __init__(self, model_path: str = "yolov8n.pt", confidence_threshold: float = 0.5):
         """

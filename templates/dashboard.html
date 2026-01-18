@@ -43,6 +43,52 @@
             color: #e74c3c;
         }
 
+        /* Threat Level Bar */
+        .threat-level-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: #12121a;
+            border-radius: 8px;
+        }
+
+        .threat-level-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .threat-level-indicator {
+            display: flex;
+            gap: 4px;
+        }
+
+        .threat-bar {
+            width: 30px;
+            height: 8px;
+            border-radius: 2px;
+            background: #333;
+            transition: background 0.3s;
+        }
+
+        .threat-bar.active.green { background: #2ecc71; }
+        .threat-bar.active.yellow { background: #f1c40f; }
+        .threat-bar.active.orange { background: #e67e22; }
+        .threat-bar.active.red { background: #e74c3c; }
+
+        .threat-level-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
+        .threat-level-text.safe { color: #2ecc71; }
+        .threat-level-text.elevated { color: #f1c40f; }
+        .threat-level-text.high { color: #e67e22; }
+        .threat-level-text.critical { color: #e74c3c; }
+
         .status-bar {
             display: flex;
             gap: 2rem;
@@ -78,27 +124,34 @@
             height: calc(100vh - 70px);
         }
 
-        .camera-grid {
+        /* Single camera - full width layout */
+        .camera-section {
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 1rem;
+            display: flex;
+            flex-direction: column;
             padding: 1rem;
+            gap: 1rem;
         }
 
         .camera-feed {
+            flex: 1;
             background: #1a1a2e;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
             position: relative;
-            border: 2px solid #333;
-            transition: border-color 0.3s;
+            border: 3px solid #333;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .camera-feed.threat {
             border-color: #e74c3c;
-            box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.4);
+            animation: threatPulse 1s infinite;
+        }
+
+        @keyframes threatPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(231, 76, 60, 0.6); }
         }
 
         .camera-header {
@@ -106,8 +159,8 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 0.75rem 1rem;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 1rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -116,20 +169,20 @@
 
         .camera-name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
         }
 
         .camera-status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #888;
         }
 
         .camera-status .dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #e74c3c;
         }
@@ -138,10 +191,27 @@
             background: #2ecc71;
         }
 
+        .live-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .camera-video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             background: #000;
         }
 
@@ -150,25 +220,86 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 1rem 1.5rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
             display: flex;
             justify-content: space-between;
-            font-size: 0.8rem;
-            color: #888;
+            align-items: center;
         }
 
-        .detection-count {
+        .detection-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
             color: #2ecc71;
+        }
+
+        .stat-value.threat {
+            color: #e74c3c;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
         }
 
         .threat-count {
             color: #e74c3c;
             font-weight: bold;
+            font-size: 1.2rem;
         }
 
+        .no-feed {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stats-card {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stats-icon {
+            font-size: 2rem;
+        }
+
+        .stats-info h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stats-info p {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* Alert Panel */
         .alert-panel {
-            width: 350px;
+            width: 380px;
             background: #12121a;
             border-left: 1px solid #333;
             display: flex;
@@ -176,7 +307,7 @@
         }
 
         .alert-header {
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             background: #1a1a2e;
             border-bottom: 1px solid #333;
             display: flex;
@@ -196,6 +327,27 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: bold;
+        }
+
+        .alert-count.zero {
+            background: #333;
+        }
+
+        .mute-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+        }
+
+        .mute-btn:hover {
+            color: #fff;
+        }
+
+        .mute-btn.muted {
+            color: #e74c3c;
         }
 
         .alert-list {
@@ -248,6 +400,8 @@
 
         .alert-actions {
             margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
         }
 
         .btn-acknowledge {
@@ -265,35 +419,89 @@
             background: #444;
         }
 
-        .no-feed {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #666;
-            font-size: 0.9rem;
+        .btn-lockdown {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: background 0.2s;
         }
 
-        /* Alert Sound Indicator */
+        .btn-lockdown:hover {
+            background: #c0392b;
+        }
+
+        .empty-alerts {
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Sound Indicator */
         .sound-indicator {
             position: fixed;
             top: 80px;
-            right: 370px;
-            background: #e74c3c;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
             display: none;
-            animation: slideIn 0.3s ease;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.5);
+            z-index: 1000;
         }
 
         .sound-indicator.show {
             display: block;
+            animation: alertSlide 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        @keyframes alertSlide {
+            from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        /* Detection Log */
+        .detection-log {
+            padding: 1rem;
+            background: #1a1a2e;
+            border-top: 1px solid #333;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .detection-log h3 {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .log-entry {
+            font-size: 0.75rem;
+            color: #666;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .log-entry .time {
+            color: #888;
+        }
+
+        .log-entry .object {
+            color: #2ecc71;
+        }
+
+        .log-entry .threat-object {
+            color: #e74c3c;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -302,33 +510,87 @@
         <div class="logo">
             <h1>Intelligence <span>Lair</span></h1>
         </div>
+
+        <div class="threat-level-bar">
+            <span class="threat-level-label">Threat Level</span>
+            <div class="threat-level-indicator">
+                <div class="threat-bar active green" id="bar1"></div>
+                <div class="threat-bar" id="bar2"></div>
+                <div class="threat-bar" id="bar3"></div>
+                <div class="threat-bar" id="bar4"></div>
+            </div>
+            <span class="threat-level-text safe" id="threatLevelText">SAFE</span>
+        </div>
+
         <div class="status-bar">
             <div class="status-item">
                 <div class="status-dot" id="connectionStatus"></div>
                 <span id="connectionText">Connecting...</span>
             </div>
-            <div class="status-item">
-                <span id="cameraCount">0</span> cameras active
-            </div>
         </div>
     </header>
 
     <main class="main-content">
-        <div class="camera-grid" id="cameraGrid">
+        <div class="camera-section">
+            <div class="stats-panel">
+                <div class="stats-card">
+                    <div class="stats-icon">👁️</div>
+                    <div class="stats-info">
+                        <h3 id="totalDetections">0</h3>
+                        <p>Objects Detected</p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon">👤</div>
+                    <div class="stats-info">
+                        <h3 id="peopleCount">0</h3>
+                        <p>People in Frame</p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon">⚠️</div>
+                    <div class="stats-info">
+                        <h3 id="threatDetections" style="color: #e74c3c;">0</h3>
+                        <p>Threats Detected</p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon">⏱️</div>
+                    <div class="stats-info">
+                        <h3 id="uptime">00:00:00</h3>
+                        <p>Session Time</p>
+                    </div>
+                </div>
+            </div>
+
             {% for camera in cameras %}
             <div class="camera-feed" id="feed-{{ camera.id }}" data-camera-id="{{ camera.id }}">
                 <div class="camera-header">
-                    <span class="camera-name">{{ camera.name }}</span>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span class="camera-name">{{ camera.name }}</span>
+                        <span class="live-badge">LIVE</span>
+                    </div>
                     <div class="camera-status">
                         <div class="dot" id="status-{{ camera.id }}"></div>
                         <span id="status-text-{{ camera.id }}">Offline</span>
                     </div>
                 </div>
                 <img class="camera-video" id="video-{{ camera.id }}" alt="{{ camera.name }}">
-                <div class="no-feed" id="nofeed-{{ camera.id }}">Waiting for feed...</div>
+                <div class="no-feed" id="nofeed-{{ camera.id }}">Waiting for camera feed...</div>
                 <div class="camera-overlay">
-                    <span class="detection-count" id="detections-{{ camera.id }}">0 detections</span>
-                    <span class="threat-count" id="threats-{{ camera.id }}"></span>
+                    <div class="detection-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="detections-{{ camera.id }}">0</div>
+                            <div class="stat-label">Detections</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value threat" id="threats-{{ camera.id }}">0</div>
+                            <div class="stat-label">Threats</div>
+                        </div>
+                    </div>
+                    <div id="threat-warning-{{ camera.id }}" style="display: none; color: #e74c3c; font-weight: bold; font-size: 1.2rem;">
+                        🚨 THREAT DETECTED
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -337,16 +599,25 @@
         <aside class="alert-panel">
             <div class="alert-header">
                 <h2>🚨 Threat Alerts</h2>
-                <span class="alert-count" id="alertCount">0</span>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="Toggle Sound">🔊</button>
+                    <span class="alert-count" id="alertCount">0</span>
+                </div>
             </div>
             <div class="alert-list" id="alertList">
-                <p style="color: #666; text-align: center; padding: 2rem;">No alerts</p>
+                <p class="empty-alerts">No threats detected</p>
+            </div>
+            <div class="detection-log">
+                <h3>Detection Log</h3>
+                <div id="detectionLog">
+                    <div class="log-entry"><span class="time">--:--:--</span> System initialized</div>
+                </div>
             </div>
         </aside>
     </main>
 
     <div class="sound-indicator" id="soundIndicator">
-        🔊 THREAT DETECTED
+        🚨 THREAT DETECTED - BLADE/WEAPON
     </div>
 
     <audio id="alertSound" preload="auto">
@@ -356,36 +627,106 @@
     <script>
         const socket = io();
         let alertCount = 0;
+        let totalDetections = 0;
+        let totalThreats = 0;
+        let isMuted = false;
+        let startTime = Date.now();
+
+        // Update uptime
+        setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
+        }, 1000);
+
+        // Mute toggle
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('muteBtn');
+            btn.textContent = isMuted ? '🔇' : '🔊';
+            btn.classList.toggle('muted', isMuted);
+        }
+
+        // Update threat level based on recent alerts
+        function updateThreatLevel(threats) {
+            const bars = [
+                document.getElementById('bar1'),
+                document.getElementById('bar2'),
+                document.getElementById('bar3'),
+                document.getElementById('bar4')
+            ];
+            const text = document.getElementById('threatLevelText');
+
+            // Reset bars
+            bars.forEach(bar => {
+                bar.classList.remove('active', 'green', 'yellow', 'orange', 'red');
+            });
+            text.classList.remove('safe', 'elevated', 'high', 'critical');
+
+            if (threats === 0) {
+                bars[0].classList.add('active', 'green');
+                text.textContent = 'SAFE';
+                text.classList.add('safe');
+            } else if (threats === 1) {
+                bars[0].classList.add('active', 'yellow');
+                bars[1].classList.add('active', 'yellow');
+                text.textContent = 'ELEVATED';
+                text.classList.add('elevated');
+            } else if (threats === 2) {
+                bars[0].classList.add('active', 'orange');
+                bars[1].classList.add('active', 'orange');
+                bars[2].classList.add('active', 'orange');
+                text.textContent = 'HIGH';
+                text.classList.add('high');
+            } else {
+                bars.forEach(bar => bar.classList.add('active', 'red'));
+                text.textContent = 'CRITICAL';
+                text.classList.add('critical');
+            }
+        }
+
+        // Add to detection log
+        function addLogEntry(text, isThreat = false) {
+            const log = document.getElementById('detectionLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="time">${time}</span> <span class="${isThreat ? 'threat-object' : 'object'}">${text}</span>`;
+            log.insertBefore(entry, log.firstChild);
+            // Keep only last 20 entries
+            while (log.children.length > 20) {
+                log.removeChild(log.lastChild);
+            }
+        }
 
         // Connection handling
         socket.on('connect', () => {
             document.getElementById('connectionStatus').classList.remove('alert');
             document.getElementById('connectionText').textContent = 'Connected';
-            console.log('Connected to server');
+            addLogEntry('Connected to server');
         });
 
         socket.on('disconnect', () => {
             document.getElementById('connectionStatus').classList.add('alert');
             document.getElementById('connectionText').textContent = 'Disconnected';
-            console.log('Disconnected from server');
+            addLogEntry('Disconnected from server', true);
         });
 
         // Camera status updates
         socket.on('camera_status', (cameras) => {
-            let activeCount = 0;
             cameras.forEach(cam => {
                 const dot = document.getElementById(`status-${cam.id}`);
                 const text = document.getElementById(`status-text-${cam.id}`);
                 if (cam.connected) {
                     dot?.classList.add('online');
                     if (text) text.textContent = `${cam.fps} FPS`;
-                    activeCount++;
                 } else {
                     dot?.classList.remove('online');
                     if (text) text.textContent = 'Offline';
                 }
             });
-            document.getElementById('cameraCount').textContent = activeCount;
         });
 
         // Frame updates for each camera
@@ -396,6 +737,7 @@
             const detectionsEl = document.getElementById('detections-{{ camera.id }}');
             const threatsEl = document.getElementById('threats-{{ camera.id }}');
             const feedEl = document.getElementById('feed-{{ camera.id }}');
+            const warningEl = document.getElementById('threat-warning-{{ camera.id }}');
 
             if (img && data.frame) {
                 img.src = 'data:image/jpeg;base64,' + data.frame;
@@ -404,18 +746,25 @@
             }
 
             if (detectionsEl) {
-                detectionsEl.textContent = `${data.detections} detection${data.detections !== 1 ? 's' : ''}`;
+                detectionsEl.textContent = data.detections;
+                document.getElementById('totalDetections').textContent = data.detections;
             }
 
             if (threatsEl) {
+                threatsEl.textContent = data.threats;
+                document.getElementById('threatDetections').textContent = totalThreats;
+
                 if (data.threats > 0) {
-                    threatsEl.textContent = `⚠️ ${data.threats} THREAT${data.threats !== 1 ? 'S' : ''}`;
                     feedEl?.classList.add('threat');
+                    warningEl.style.display = 'block';
                 } else {
-                    threatsEl.textContent = '';
                     feedEl?.classList.remove('threat');
+                    warningEl.style.display = 'none';
                 }
             }
+
+            // Update people count (estimate from detections)
+            document.getElementById('peopleCount').textContent = Math.max(0, data.detections - data.threats);
         });
         {% endfor %}
 
@@ -423,28 +772,39 @@
         socket.on('new_alert', (alert) => {
             console.log('New alert:', alert);
             alertCount++;
+            totalThreats++;
             document.getElementById('alertCount').textContent = alertCount;
+            document.getElementById('alertCount').classList.remove('zero');
+            document.getElementById('threatDetections').textContent = totalThreats;
 
-            // Play sound
-            const sound = document.getElementById('alertSound');
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log('Audio play failed:', e));
+            // Update threat level
+            updateThreatLevel(alertCount);
+
+            // Play sound if not muted
+            if (!isMuted) {
+                const sound = document.getElementById('alertSound');
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            }
 
             // Show indicator
             const indicator = document.getElementById('soundIndicator');
+            indicator.textContent = `🚨 THREAT DETECTED - ${alert.threat_type.toUpperCase()}`;
             indicator.classList.add('show');
             setTimeout(() => indicator.classList.remove('show'), 3000);
 
+            // Add to log
+            addLogEntry(`THREAT: ${alert.threat_type} detected at ${alert.camera_name}`, true);
+
             // Add to alert list
             const alertList = document.getElementById('alertList');
-            if (alertList.querySelector('p')) {
-                alertList.innerHTML = '';
-            }
+            const emptyMsg = alertList.querySelector('.empty-alerts');
+            if (emptyMsg) emptyMsg.remove();
 
             const alertHtml = `
                 <div class="alert-item" id="${alert.id}">
                     <div class="alert-item-header">
-                        <span class="alert-type">${alert.threat_type}</span>
+                        <span class="alert-type">🔪 ${alert.threat_type}</span>
                         <span class="alert-time">${alert.time_str}</span>
                     </div>
                     <div class="alert-location">📍 ${alert.camera_name}</div>
@@ -452,6 +812,9 @@
                     <div class="alert-actions">
                         <button class="btn-acknowledge" onclick="acknowledgeAlert('${alert.id}')">
                             Acknowledge
+                        </button>
+                        <button class="btn-lockdown" onclick="triggerLockdown()">
+                            🚨 LOCKDOWN
                         </button>
                     </div>
                 </div>
@@ -468,12 +831,24 @@
                         const alertEl = document.getElementById(alertId);
                         if (alertEl) {
                             alertEl.classList.add('acknowledged');
-                            alertEl.querySelector('.btn-acknowledge').remove();
+                            const actions = alertEl.querySelector('.alert-actions');
+                            if (actions) actions.remove();
                         }
                         alertCount = Math.max(0, alertCount - 1);
                         document.getElementById('alertCount').textContent = alertCount;
+                        if (alertCount === 0) {
+                            document.getElementById('alertCount').classList.add('zero');
+                        }
+                        updateThreatLevel(alertCount);
+                        addLogEntry(`Alert ${alertId} acknowledged`);
                     }
                 });
+        }
+
+        // Lockdown trigger (demo)
+        function triggerLockdown() {
+            alert('🚨 LOCKDOWN INITIATED\n\nIn a real system, this would:\n- Lock all doors\n- Alert all staff via mobile app\n- Contact emergency services\n- Activate PA system');
+            addLogEntry('LOCKDOWN TRIGGERED', true);
         }
 
         // Load existing alerts on page load
@@ -482,13 +857,16 @@
             .then(alerts => {
                 if (alerts.length > 0) {
                     const alertList = document.getElementById('alertList');
-                    alertList.innerHTML = '';
+                    const emptyMsg = alertList.querySelector('.empty-alerts');
+                    if (emptyMsg) emptyMsg.remove();
+
                     alerts.forEach(alert => {
                         if (!alert.acknowledged) alertCount++;
+                        totalThreats++;
                         const alertHtml = `
                             <div class="alert-item ${alert.acknowledged ? 'acknowledged' : ''}" id="${alert.id}">
                                 <div class="alert-item-header">
-                                    <span class="alert-type">${alert.threat_type}</span>
+                                    <span class="alert-type">🔪 ${alert.threat_type}</span>
                                     <span class="alert-time">${alert.time_str}</span>
                                 </div>
                                 <div class="alert-location">📍 ${alert.camera_name}</div>
@@ -498,14 +876,26 @@
                                     <button class="btn-acknowledge" onclick="acknowledgeAlert('${alert.id}')">
                                         Acknowledge
                                     </button>
+                                    <button class="btn-lockdown" onclick="triggerLockdown()">
+                                        🚨 LOCKDOWN
+                                    </button>
                                 </div>` : ''}
                             </div>
                         `;
                         alertList.insertAdjacentHTML('beforeend', alertHtml);
                     });
                     document.getElementById('alertCount').textContent = alertCount;
+                    document.getElementById('threatDetections').textContent = totalThreats;
+                    if (alertCount > 0) {
+                        document.getElementById('alertCount').classList.remove('zero');
+                    }
+                    updateThreatLevel(alertCount);
                 }
             });
+
+        // Initialize
+        updateThreatLevel(0);
+        addLogEntry('System initialized - monitoring active');
     </script>
 </body>
 </html>

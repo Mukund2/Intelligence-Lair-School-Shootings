@@ -43,8 +43,8 @@ else:
     ]
 
 # Detection settings
-DETECTION_CONFIDENCE = 0.5  # Minimum confidence for detection
-WEAPON_CLASSES = ["knife", "gun", "rifle", "pistol"]  # Classes to flag as threats
+DETECTION_CONFIDENCE = 0.35  # Lower threshold to catch more potential threats
+WEAPON_CLASSES = ["knife", "scissors", "fork"]  # COCO classes that could be weapons
 
 # Alert settings
 ALERT_COOLDOWN = 10  # Seconds between alerts for same camera

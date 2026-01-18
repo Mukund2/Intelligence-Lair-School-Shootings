@@ -43,7 +43,7 @@ else:
     ]
 
 # Detection settings
-DETECTION_CONFIDENCE = 0.25  # Low threshold to catch more potential threats
+DETECTION_CONFIDENCE = 0.20  # Very low threshold to catch scissors
 WEAPON_CLASSES = ["knife", "scissors", "fork", "baseball bat"]  # COCO classes that could be weapons
 
 # Alert settings

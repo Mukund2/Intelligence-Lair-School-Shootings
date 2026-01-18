@@ -12,7 +12,7 @@ app.config["SECRET_KEY"] = "intelligence-lair-secret"
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Initialize components
-detector = WeaponDetector(model_path="yolov8n.pt", confidence_threshold=config.DETECTION_CONFIDENCE)
+detector = WeaponDetector(model_path="yolov8s.pt", confidence_threshold=config.DETECTION_CONFIDENCE)
 alert_manager = AlertManager(cooldown_seconds=config.ALERT_COOLDOWN)
 cameras: dict[str, CameraStream] = {}
 

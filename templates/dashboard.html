@@ -534,31 +534,31 @@
         <div class="camera-section">
             <div class="stats-panel">
                 <div class="stats-card">
-                    <div class="stats-icon">👁️</div>
-                    <div class="stats-info">
-                        <h3 id="totalDetections">0</h3>
-                        <p>Objects Detected</p>
-                    </div>
-                </div>
-                <div class="stats-card">
                     <div class="stats-icon">👤</div>
                     <div class="stats-info">
                         <h3 id="peopleCount">0</h3>
-                        <p>People in Frame</p>
+                        <p>People</p>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon">📦</div>
+                    <div class="stats-info">
+                        <h3 id="totalDetections">0</h3>
+                        <p>Objects</p>
                     </div>
                 </div>
                 <div class="stats-card">
                     <div class="stats-icon">⚠️</div>
                     <div class="stats-info">
                         <h3 id="threatDetections" style="color: #e74c3c;">0</h3>
-                        <p>Threats Detected</p>
+                        <p>Threats (Session)</p>
                     </div>
                 </div>
                 <div class="stats-card">
                     <div class="stats-icon">⏱️</div>
                     <div class="stats-info">
                         <h3 id="uptime">00:00:00</h3>
-                        <p>Session Time</p>
+                        <p>Uptime</p>
                     </div>
                 </div>
             </div>
@@ -747,11 +747,14 @@
 
             if (detectionsEl) {
                 detectionsEl.textContent = data.detections;
-                document.getElementById('totalDetections').textContent = data.detections;
+                // Objects = total detections minus people minus threats
+                const objectsOnly = Math.max(0, data.detections - (data.people || 0) - data.threats);
+                document.getElementById('totalDetections').textContent = objectsOnly;
             }
 
             if (threatsEl) {
                 threatsEl.textContent = data.threats;
+                // Only show session total threats, not current
                 document.getElementById('threatDetections').textContent = totalThreats;
 
                 // Update threat level based on CURRENT live threats

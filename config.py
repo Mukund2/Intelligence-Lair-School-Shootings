@@ -47,4 +47,4 @@ DETECTION_CONFIDENCE = 0.20  # Very low threshold to catch scissors
 WEAPON_CLASSES = ["knife", "scissors", "fork", "baseball bat"]  # COCO classes that could be weapons
 
 # Alert settings
-ALERT_COOLDOWN = 10  # Seconds between alerts for same camera
+ALERT_COOLDOWN = 30  # Seconds between alerts for same camera (prevents duplicate counting)

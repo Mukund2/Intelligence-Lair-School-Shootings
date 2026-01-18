@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligence Lair - Threat Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logo span {
+            color: #e74c3c;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2ecc71;
+        }
+
+        .status-dot.alert {
+            background: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .camera-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .camera-feed {
+            background: #1a1a2e;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #333;
+            transition: border-color 0.3s;
+        }
+
+        .camera-feed.threat {
+            border-color: #e74c3c;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .camera-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .camera-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .camera-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e74c3c;
+        }
+
+        .camera-status .dot.online {
+            background: #2ecc71;
+        }
+
+        .camera-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .detection-count {
+            color: #2ecc71;
+        }
+
+        .threat-count {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .alert-panel {
+            width: 350px;
+            background: #12121a;
+            border-left: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .alert-header {
+            padding: 1rem;
+            background: #1a1a2e;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .alert-count {
+            background: #e74c3c;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .alert-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .alert-item {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .alert-item.acknowledged {
+            opacity: 0.5;
+            border-left-color: #666;
+        }
+
+        .alert-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-type {
+            color: #e74c3c;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .alert-time {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .alert-location {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-confidence {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .alert-actions {
+            margin-top: 0.75rem;
+        }
+
+        .btn-acknowledge {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        .btn-acknowledge:hover {
+            background: #444;
+        }
+
+        .no-feed {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Alert Sound Indicator */
+        .sound-indicator {
+            position: fixed;
+            top: 80px;
+            right: 370px;
+            background: #e74c3c;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .sound-indicator.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <h1>Intelligence <span>Lair</span></h1>
+        </div>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot" id="connectionStatus"></div>
+                <span id="connectionText">Connecting...</span>
+            </div>
+            <div class="status-item">
+                <span id="cameraCount">0</span> cameras active
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="camera-grid" id="cameraGrid">
+            {% for camera in cameras %}
+            <div class="camera-feed" id="feed-{{ camera.id }}" data-camera-id="{{ camera.id }}">
+                <div class="camera-header">
+                    <span class="camera-name">{{ camera.name }}</span>
+                    <div class="camera-status">
+                        <div class="dot" id="status-{{ camera.id }}"></div>
+                        <span id="status-text-{{ camera.id }}">Offline</span>
+                    </div>
+                </div>
+                <img class="camera-video" id="video-{{ camera.id }}" alt="{{ camera.name }}">
+                <div class="no-feed" id="nofeed-{{ camera.id }}">Waiting for feed...</div>
+                <div class="camera-overlay">
+                    <span class="detection-count" id="detections-{{ camera.id }}">0 detections</span>
+                    <span class="threat-count" id="threats-{{ camera.id }}"></span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <aside class="alert-panel">
+            <div class="alert-header">
+                <h2>🚨 Threat Alerts</h2>
+                <span class="alert-count" id="alertCount">0</span>
+            </div>
+            <div class="alert-list" id="alertList">
+                <p style="color: #666; text-align: center; padding: 2rem;">No alerts</p>
+            </div>
+        </aside>
+    </main>
+
+    <div class="sound-indicator" id="soundIndicator">
+        🔊 THREAT DETECTED
+    </div>
+
+    <audio id="alertSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const socket = io();
+        let alertCount = 0;
+
+        // Connection handling
+        socket.on('connect', () => {
+            document.getElementById('connectionStatus').classList.remove('alert');
+            document.getElementById('connectionText').textContent = 'Connected';
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('connectionStatus').classList.add('alert');
+            document.getElementById('connectionText').textContent = 'Disconnected';
+            console.log('Disconnected from server');
+        });
+
+        // Camera status updates
+        socket.on('camera_status', (cameras) => {
+            let activeCount = 0;
+            cameras.forEach(cam => {
+                const dot = document.getElementById(`status-${cam.id}`);
+                const text = document.getElementById(`status-text-${cam.id}`);
+                if (cam.connected) {
+                    dot?.classList.add('online');
+                    if (text) text.textContent = `${cam.fps} FPS`;
+                    activeCount++;
+                } else {
+                    dot?.classList.remove('online');
+                    if (text) text.textContent = 'Offline';
+                }
+            });
+            document.getElementById('cameraCount').textContent = activeCount;
+        });
+
+        // Frame updates for each camera
+        {% for camera in cameras %}
+        socket.on('frame_{{ camera.id }}', (data) => {
+            const img = document.getElementById('video-{{ camera.id }}');
+            const noFeed = document.getElementById('nofeed-{{ camera.id }}');
+            const detectionsEl = document.getElementById('detections-{{ camera.id }}');
+            const threatsEl = document.getElementById('threats-{{ camera.id }}');
+            const feedEl = document.getElementById('feed-{{ camera.id }}');
+
+            if (img && data.frame) {
+                img.src = 'data:image/jpeg;base64,' + data.frame;
+                img.style.display = 'block';
+                if (noFeed) noFeed.style.display = 'none';
+            }
+
+            if (detectionsEl) {
+                detectionsEl.textContent = `${data.detections} detection${data.detections !== 1 ? 's' : ''}`;
+            }
+
+            if (threatsEl) {
+                if (data.threats > 0) {
+                    threatsEl.textContent = `⚠️ ${data.threats} THREAT${data.threats !== 1 ? 'S' : ''}`;
+                    feedEl?.classList.add('threat');
+                } else {
+                    threatsEl.textContent = '';
+                    feedEl?.classList.remove('threat');
+                }
+            }
+        });
+        {% endfor %}
+
+        // New alert handling
+        socket.on('new_alert', (alert) => {
+            console.log('New alert:', alert);
+            alertCount++;
+            document.getElementById('alertCount').textContent = alertCount;
+
+            // Play sound
+            const sound = document.getElementById('alertSound');
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log('Audio play failed:', e));
+
+            // Show indicator
+            const indicator = document.getElementById('soundIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => indicator.classList.remove('show'), 3000);
+
+            // Add to alert list
+            const alertList = document.getElementById('alertList');
+            if (alertList.querySelector('p')) {
+                alertList.innerHTML = '';
+            }
+
+            const alertHtml = `
+                <div class="alert-item" id="${alert.id}">
+                    <div class="alert-item-header">
+                        <span class="alert-type">${alert.threat_type}</span>
+                        <span class="alert-time">${alert.time_str}</span>
+                    </div>
+                    <div class="alert-location">📍 ${alert.camera_name}</div>
+                    <div class="alert-confidence">Confidence: ${(alert.confidence * 100).toFixed(1)}%</div>
+                    <div class="alert-actions">
+                        <button class="btn-acknowledge" onclick="acknowledgeAlert('${alert.id}')">
+                            Acknowledge
+                        </button>
+                    </div>
+                </div>
+            `;
+            alertList.insertAdjacentHTML('afterbegin', alertHtml);
+        });
+
+        // Acknowledge alert
+        function acknowledgeAlert(alertId) {
+            fetch(`/api/alerts/${alertId}/acknowledge`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const alertEl = document.getElementById(alertId);
+                        if (alertEl) {
+                            alertEl.classList.add('acknowledged');
+                            alertEl.querySelector('.btn-acknowledge').remove();
+                        }
+                        alertCount = Math.max(0, alertCount - 1);
+                        document.getElementById('alertCount').textContent = alertCount;
+                    }
+                });
+        }
+
+        // Load existing alerts on page load
+        fetch('/api/alerts')
+            .then(response => response.json())
+            .then(alerts => {
+                if (alerts.length > 0) {
+                    const alertList = document.getElementById('alertList');
+                    alertList.innerHTML = '';
+                    alerts.forEach(alert => {
+                        if (!alert.acknowledged) alertCount++;
+                        const alertHtml = `
+                            <div class="alert-item ${alert.acknowledged ? 'acknowledged' : ''}" id="${alert.id}">
+                                <div class="alert-item-header">
+                                    <span class="alert-type">${alert.threat_type}</span>
+                                    <span class="alert-time">${alert.time_str}</span>
+                                </div>
+                                <div class="alert-location">📍 ${alert.camera_name}</div>
+                                <div class="alert-confidence">Confidence: ${(alert.confidence * 100).toFixed(1)}%</div>
+                                ${!alert.acknowledged ? `
+                                <div class="alert-actions">
+                                    <button class="btn-acknowledge" onclick="acknowledgeAlert('${alert.id}')">
+                                        Acknowledge
+                                    </button>
+                                </div>` : ''}
+                            </div>
+                        `;
+                        alertList.insertAdjacentHTML('beforeend', alertHtml);
+                    });
+                    document.getElementById('alertCount').textContent = alertCount;
+                }
+            });
+    </script>
+</body>
+</html>
